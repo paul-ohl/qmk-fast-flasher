@@ -58,7 +58,7 @@ fi
 script_directory=$(dirname "$0")
 
 # Stow the directories
-stow -t "$clone_location/keyboards/" "$script_directory/my_keymaps"
+stow -d "$script_directory" -t "$clone_location/keyboards/" my_keymaps
 
 # Select keyboard
 selected_keyboard=''
