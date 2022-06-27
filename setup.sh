@@ -4,6 +4,7 @@
 
 # Where you want the qmk firmware to be cloned, read README.md for warnings
 clone_location="$HOME/.local/share/qmk_firmware"
+multiple_bootloaders="true"
 
 # Check if need to install qmk cli
 if ! [[ "$(command -v qmk)" ]]; then
@@ -82,5 +83,31 @@ printf "Done! Flash your keyboard? (y/n)"
 read -r -d '' -sn1 user_input
 if [[ "$user_input" = 'y' ]]; then
 	echo ""
+	if [[ "$multiple_bootloaders" = "true" ]]; then
+		selected_bootloader="error"
+		while [ "$selected_bootloader" = "error" ]; do
+			echo "select the bootloader you want to configure qmk to use: "
+			echo "    1. Caterina (Pro-micro, LilyPadUSB, Arduino, Adafruit, etc.)"
+			echo "    2. Qmk DFU (Elite-c)"
+			echo "    2. Atmel DFU (ATmega boards)"
+			read -r -d '' -sn1 selected_bootloader
+			case "$selected_bootloader" in
+				1) selected_bootloader='caterina';;
+				2) selected_bootloader='qmk-dfu';;
+				3) selected_bootloader='atmel-dfu';;
+				*)
+					echo "Option does not exist, Ctrl-c to exit"
+					selected_bootloader="error";;
+			esac
+		done
+		rules_file="./my_keymaps/$selected_keyboard/keymap/$selected_keymap/rules.mk"
+		if grep BOOTLOADER "$rules_file" > /dev/null; then
+			sed "s/BOOTLOADER.*/BOOTLOADER = $selected_bootloader/" "$rules_file" > "$rules_file.tmp"
+			mv "$rules_file.tmp" "$rules_file"
+		else
+			echo "# Added by flashqmk script, bootloader information" >> "$rules_file"
+			echo "BOOTLOADER = $selected_bootloader" >> "$rules_file"
+		fi
+	fi
 	qmk flash
 fi
