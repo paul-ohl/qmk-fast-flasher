@@ -6,6 +6,31 @@
 clone_location="$HOME/.local/share/qmk_firmware"
 multiple_bootloaders="true"
 
+# argument 1: Path to folder containing elements
+# argument 2: name of variable to modify
+select_option () {
+	element_list=$(ls -m "$1")
+	IFS=', ' read -ra element_list <<< "$element_list"
+	if [[ "${#element_list[@]}" = "1" ]]; then
+		selected_element=${element_list[0]}
+	else
+		selected_element="error"
+		while [ "$selected_element" = "error" ]; do
+			echo "select the ${2#selected_} you want to configure qmk to use: "
+			for (( i = 0; i < ${#element_list[@]}; i++)); do
+				echo "    $((i + 1)): ${element_list[$i]}"
+			done
+			read -r -d '' -sn1 selected_element
+			selected_element="${element_list[$((selected_element - 1))]}"
+			if [[ "$selected_element" = "" ]]; then
+				echo "Option does not exist, Ctrl-c to exit"
+				selected_element="error"
+			fi
+		done
+	fi
+	export "$2"="$selected_element"
+}
+
 # Check if need to install qmk cli
 if ! [[ "$(command -v qmk)" ]]; then
 	if [[ "$(command -v paru)" ]]; then
@@ -30,52 +55,19 @@ if ! [[ -e "$clone_location" ]]; then
 	qmk setup -H "$clone_location"
 fi
 
-# Select keyboard
-keyboard_list=$(ls -m "./my_keymaps/")
-IFS=', ' read -ra keyboard_list <<< "$keyboard_list"
-if [[ "${#keyboard_list[@]}" = "1" ]]; then
-	selected_keyboard=${keyboard_list[0]}
-else
-	selected_keyboard="error"
-	while [ "$selected_keyboard" = "error" ]; do
-		echo "select the keyboard you want to configure qmk to use: "
-		for (( i = 0; i < ${#keyboard_list[@]}; i++)); do
-			echo "$((i + 1)): ${keyboard_list[$i]}"
-		done
-		read -r -d '' -sn1 selected_keyboard
-		selected_keyboard="${keyboard_list[$((selected_keyboard - 1))]}"
-		if [[ "$selected_keyboard" = "" ]]; then
-			echo "Option does not exist, Ctrl-c to exit"
-			selected_keyboard="error"
-		fi
-	done
-fi
-
-# Select keymap
-keymap_list=$(ls -m "./my_keymaps/$selected_keyboard/keymaps/")
-IFS=', ' read -ra keymap_list <<< "$keymap_list"
-if [[ "${#keymap_list[@]}" = "1" ]]; then
-	selected_keymap=${keymap_list[0]}
-else
-	selected_keymap="error"
-	while [ "$selected_keymap" = "error" ]; do
-		echo "select the keymap you want to configure qmk to use: "
-		for (( i = 0; i < ${#keymap_list[@]}; i++)); do
-			echo "$((i + 1)): ${keymap_list[$i]}"
-		done
-		read -r -d '' -sn1 selected_keymap
-		selected_keymap="${keymap_list[$((selected_keymap - 1))]}"
-		if [[ "$selected_keymap" = "" ]]; then
-			echo "Option does not exist, Ctrl-c to exit"
-			selected_keymap="error"
-		fi
-	done
-fi
-
-echo "Stowing your repos inside qmk firmware"
+# Stow the directories
 stow -t "$clone_location/keyboards/" my_keymaps
 
-echo "Setting up qmk to use keymap located in: $clone_location/keyboards/$selected_keyboard/keymap/$selected_keymap/"
+# Select keyboard
+selected_keyboard=''
+select_option "./my_keymaps/" "selected_keyboard"
+
+# Select keymap
+selected_keymap=''
+select_option "./my_keymaps/$selected_keyboard/keymaps/" "selected_keymap"
+
+echo "Setting up qmk to use keymap located in:" \
+	"$clone_location/keyboards/$selected_keyboard/keymap/$selected_keymap/"
 qmk config user.keyboard="$selected_keyboard"
 qmk config user.keymap="$selected_keymap"
 
@@ -87,7 +79,7 @@ if [[ "$user_input" = 'y' ]]; then
 		selected_bootloader="error"
 		while [ "$selected_bootloader" = "error" ]; do
 			echo "select the bootloader you want to configure qmk to use: "
-			echo "    1. Caterina (Pro-micro, LilyPadUSB, Arduino, Adafruit, etc.)"
+			echo "    1. Caterina (Pro-micro, LilyPadUSB, Arduino, Adafruit)"
 			echo "    2. Qmk DFU (Elite-c)"
 			echo "    2. Atmel DFU (ATmega boards)"
 			read -r -d '' -sn1 selected_bootloader
@@ -100,12 +92,14 @@ if [[ "$user_input" = 'y' ]]; then
 					selected_bootloader="error";;
 			esac
 		done
-		rules_file="./my_keymaps/$selected_keyboard/keymap/$selected_keymap/rules.mk"
+		rules_file="./my_keymaps/$selected_keyboard/keymaps/$selected_keymap/rules.mk"
 		if grep BOOTLOADER "$rules_file" > /dev/null; then
-			sed "s/BOOTLOADER.*/BOOTLOADER = $selected_bootloader/" "$rules_file" > "$rules_file.tmp"
+			sed "s/BOOTLOADER.*/BOOTLOADER = $selected_bootloader/" \
+				"$rules_file" > "$rules_file.tmp"
 			mv "$rules_file.tmp" "$rules_file"
 		else
-			echo "# Added by flashqmk script, bootloader information" >> "$rules_file"
+			echo "# Added by flashqmk script, bootloader information" \
+				>> "$rules_file"
 			echo "BOOTLOADER = $selected_bootloader" >> "$rules_file"
 		fi
 	fi
