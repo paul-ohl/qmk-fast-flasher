@@ -52,8 +52,8 @@ If you want to change where the qmk repository is cloned, change the
 If you own multiple types of micro-controllers and regularly need to change your
 bootloader, set the `multiple_bootloaders` variable to true. Then when you will
 be asked to select a bootloader before flashing your keyboard.
-**The script will modify your `rules.mk` file, it is pretty safe but always make
-backups!**
+**This part of the script will modify your `rules.mk` file, it is pretty safe
+but always make backups!**
 
 If you're not interested in this feature, set it to false.
 
