@@ -1,4 +1,4 @@
-# QMK flasher
+# QMK fast flasher
 
 ## ✨ Features
 
