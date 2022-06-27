@@ -38,14 +38,15 @@ if ! [[ "$(command -v qmk)" ]]; then
 	elif [[ "$(command -v yay)" ]]; then
 		yay -S qmk stow
 	elif [[ "$(command -v pacman)" ]]; then
-		pacman -S qmk stow
+		sudo pacman -S qmk stow
 	elif [[ "$(command -v brew)" ]]; then
 		brew install qmk stow
 	elif [[ "$(command -v yum)" ]]; then
-		yum install qmk stow
+		sudo yum install qmk stow
 	elif [[ "$(command -v apt)" ]]; then
-		apt install git python3-pip stow
+		sudo apt install git python3-pip stow
 		python3 -m pip install --user qmk
+		PATH="$HOME/.local/bin/:$PATH"
 	fi
 fi
 
