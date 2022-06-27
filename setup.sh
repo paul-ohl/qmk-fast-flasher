@@ -55,16 +55,18 @@ if ! [[ -e "$clone_location" ]]; then
 	qmk setup -H "$clone_location"
 fi
 
+script_directory=$(dirname "$0")
+
 # Stow the directories
-stow -t "$clone_location/keyboards/" my_keymaps
+stow -t "$clone_location/keyboards/" "$script_directory/my_keymaps"
 
 # Select keyboard
 selected_keyboard=''
-select_option "./my_keymaps/" "selected_keyboard"
+select_option "$script_directory/my_keymaps/" "selected_keyboard"
 
 # Select keymap
 selected_keymap=''
-select_option "./my_keymaps/$selected_keyboard/keymaps/" "selected_keymap"
+select_option "$script_directory/my_keymaps/$selected_keyboard/keymaps/" "selected_keymap"
 
 echo "Setting up qmk to use keymap located in:" \
 	"$clone_location/keyboards/$selected_keyboard/keymap/$selected_keymap/"
@@ -92,7 +94,7 @@ if [[ "$user_input" = 'y' ]]; then
 					selected_bootloader="error";;
 			esac
 		done
-		rules_file="./my_keymaps/$selected_keyboard/keymaps/$selected_keymap/rules.mk"
+		rules_file="$script_directory/my_keymaps/$selected_keyboard/keymaps/$selected_keymap/rules.mk"
 		if grep BOOTLOADER "$rules_file" > /dev/null; then
 			sed "s/BOOTLOADER.*/BOOTLOADER = $selected_bootloader/" \
 				"$rules_file" > "$rules_file.tmp"
