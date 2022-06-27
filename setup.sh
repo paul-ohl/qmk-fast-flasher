@@ -25,8 +25,8 @@ fi
 
 # Check if need to clone repo
 if ! [[ -e "$clone_location" ]]; then
-	echo "Cloning qmk"
-	git clone https://github.com/qmk/qmk_firmware.git "$clone_location"
+	echo "installing qmk in $clone_location"
+	qmk setup -H "$clone_location"
 fi
 
 # Select keyboard
@@ -75,7 +75,6 @@ echo "Stowing your repos inside qmk firmware"
 stow -t "$clone_location/keyboards/" my_keymaps
 
 echo "Setting up qmk to use keymap located in: $clone_location/keyboards/$selected_keyboard/keymap/$selected_keymap/"
-qmk setup -H "$clone_location"
 qmk config user.keyboard="$selected_keyboard"
 qmk config user.keymap="$selected_keymap"
 
