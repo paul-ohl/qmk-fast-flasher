@@ -31,18 +31,36 @@ select_option () {
 	export "$2"="$selected_element"
 }
 
+needed_dependencies=''
+
+check_for_dependency() {
+	if ! [[ "$(command -v "$1")" ]]; then
+		echo "Dependency $1 missing!"
+		needed_dependencies="$needed_dependencies $1"
+	fi
+}
+
+check_for_dependency python3
+check_for_dependency stow
+check_for_dependency qmk
+
 # Check if need to install qmk cli
-if ! [[ "$(command -v qmk)" ]]; then
+if ! [[ "$needed_dependencies" = "" ]]; then
+	printf "Some needed dependencies are missing, do you want to install them? (y/n)"
+	read -r -d '' -sn1 user_input
+	if ! [[ "$user_input" = 'y' ]]; then
+		exit 1
+	fi
 	if [[ "$(command -v paru)" ]]; then
-		paru -S qmk stow
+		paru -S $needed_dependencies
 	elif [[ "$(command -v yay)" ]]; then
-		yay -S qmk stow
+		yay -S $needed_dependencies
 	elif [[ "$(command -v pacman)" ]]; then
-		sudo pacman -S qmk stow
+		sudo pacman -S $needed_dependencies
 	elif [[ "$(command -v brew)" ]]; then
-		brew install qmk stow
+		brew install $needed_dependencies
 	elif [[ "$(command -v yum)" ]]; then
-		sudo yum install qmk stow
+		sudo yum install $needed_dependencies
 	elif [[ "$(command -v apt)" ]]; then
 		sudo apt install git python3-pip stow
 		python3 -m pip install --user qmk

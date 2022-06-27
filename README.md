@@ -70,6 +70,10 @@ If you don't want to reconfigure which keyboard/keymap you want to use every
 time, just set it with this script and then use the `qmk flash` command, it will
 remember which keyboard-keymap combination you last used.
 
+If you are on Ubuntu, the script will fix the `$PATH` bug for itself, but if you
+want to use the `qmk` command, you will need to add `$HOME/.local/bin/` to your
+`$PATH` like so: `export PATH="$HOME/.local/bin/:$PATH"`
+
 ## 🤨 Notes from the developer
 
 This script obviously exists because I'm lazy.
