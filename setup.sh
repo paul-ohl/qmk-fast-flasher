@@ -81,7 +81,7 @@ if [[ "$user_input" = 'y' ]]; then
 			echo "select the bootloader you want to configure qmk to use: "
 			echo "    1. Caterina (Pro-micro, LilyPadUSB, Arduino, Adafruit)"
 			echo "    2. Qmk DFU (Elite-c)"
-			echo "    2. Atmel DFU (ATmega boards)"
+			echo "    3. Atmel DFU (ATmega boards)"
 			read -r -d '' -sn1 selected_bootloader
 			case "$selected_bootloader" in
 				1) selected_bootloader='caterina';;
