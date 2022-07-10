@@ -76,6 +76,8 @@ want to use the `qmk` command, you will need to add `$HOME/.local/bin/` to your
 
 ## 🤨 Notes from the developer
 
+Warning, this script is in alpha. There are probably bugs, make backups.
+
 This script obviously exists because I'm lazy.
 I often change and reset my machines and I always need to reinstall qmk to
 modify my keyboard macros, so this script does it for me.
